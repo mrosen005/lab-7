@@ -21,7 +21,12 @@ modular code.
 #| label: setup
 
 library(tidyverse)
+library(here)
 
+fish <- read_csv(here("data",
+              "BlackfootFish.csv"
+              )
+         )
 
 ```
 
@@ -55,12 +60,54 @@ measurement errors.
 ```{r}
 #| label: find-missing-values
 
+missing_values <- fish |> 
+  summarise(across(.cols = trip:species, 
+           .fns = ~ sum(is.na(.)),
+           .names = "{.col}_na"
+                  )
+           ,
+    na_observations = sum(if_any(everything(),
+                                 is.na
+                                 )
+                          )
+    ) |>
+  print()
+
 ```
 
 **2. Create ONE thoughtful visualization that explores the frequency of missing values across the different years, sections, and trips.**
 
 ```{r}
 #| label: visual-of-missing-values-over-time
+
+fish |> 
+  filter(is.na(weight)) |> 
+  group_by(year, 
+           section, 
+           trip) |> 
+  summarize(missing = n()) |>
+  ggplot(mapping= aes(x = trip, 
+                      y = missing, 
+                      fill = section)) + 
+  geom_bar(stat = "identity", 
+           position = "stack"
+           ) + 
+  facet_wrap( ~ year) + 
+  labs(title = "Frequency of Missing Values Across Years, Sections, and Trips",
+       subtitle = "Number of Missing Values", 
+       x = "Trip", 
+       fill = "Section", 
+       y = "") + 
+  theme_minimal() + 
+  theme_bw() + 
+  theme(aspect.ratio = 1/2, 
+        axis.text.x = element_text(size = 6), 
+        legend.title = element_text(size = 8)
+        ) +
+  scale_x_continuous(breaks = c(1,
+                                2
+                                )
+                     )
 
 ```
 
@@ -94,6 +141,7 @@ understand the intent of the process. *Additionally, it can make it very difficu
 
 **3. What is the mistake I made in the above rescaling code?**
 
+In the last line of the code, min(length...) has been written when it should be min(weight... ). This exemplifies how easy it can be to make a small mistake in code when duplicating an action multiple times. Writing a function can make this process simpler and can ensure simple mistakes are not made. 
 
 When you find yourself copy-pasting lines of code, it's time to write a
 function, instead!
@@ -105,6 +153,15 @@ function, instead!
 
 ```{r}
 #| label: write-rescale-function
+
+rescale_01 <- function(x) {
+  if(!is.numeric(x)) stop("Input vector must be numeric.")
+  if(length(x) <= 1) stop("Input vector requires more than one element.")
+  range_1 <- range(x,
+        na.rm = TRUE
+        )
+  (x - range_1[1]) / (range_1[2] - range_1[1])
+}
 
 ```
 
@@ -154,11 +211,37 @@ statement in order to create a `length_scaled` variable.
 ```{r}
 #| label: compare-original-with-rescaled-lengths
 
-fish |>  
-  ggplot(aes(x = length)) + 
-  geom_histogram(binwidth = 45) +
-  labs(x = "Original Values of Fish Length (mm)") +
-  scale_y_continuous(limits = c(0,4000))
+
+fish_long <- fish |> 
+  mutate(length_scaled = rescale_01(length)) |> 
+  pivot_longer(cols = c(length,
+                        length_scaled
+                        ), 
+               names_to = "Type_of_Length", 
+               values_to = "Length") |> 
+  mutate(Type_of_Length = fct_recode(Type_of_Length, 
+                                     "Original Length" = "length",
+                                     "Rescaled Length" = "length_scaled"
+                                     )
+         )
+
+  ggplot(data = fish_long,
+         mapping = aes(x = Length)
+         ) + 
+  geom_histogram() +
+  facet_wrap(~ Type_of_Length,
+             scales = "free_x") +
+  labs(x = "Fish Length", 
+       subtitle = "Number of Fish", 
+       title = "Original and Rescaled Values of Length", 
+       y = "") + 
+  scale_y_continuous(limits = c(0, 
+                                4000
+                                )
+                     ) + 
+  theme_minimal() +
+  theme_bw()
+
 
 # Code for Q7 plot.
 
@@ -194,6 +277,10 @@ section of R for Data Science!
 ```{r}
 #| label: rescale-data-frame-function
 
+rescale_column <- function(Df, x) {
+  
+}
+
 ```
 
 **9. Use your `rescale_column()` function to rescale *both* the `length` and `weight` columns.**
@@ -204,5 +291,8 @@ I expect that you carry out this process by calling the `rescale_column()` funct
 
 ```{r}
 #| label: rescale-two-columns
+
+
+
 
 ```
