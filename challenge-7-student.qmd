@@ -97,12 +97,14 @@ dataset and variable names as inputs)!
 ```{r}
 #| label: condition-function
 
+
 condition_index <- function(weight, length) {
   if (!is.numeric(weight) || !is.numeric(length)) {
-    stop("weight and length must be numeric vectors.")
+    stop("weight and length must be numeric vectors")
   }
-  (weight / (length^3)) * 100
+  (weight / (length^3)) * 100 
 }
+
 
 fish <- fish |> 
    mutate(condition = condition_index(weight,
@@ -123,28 +125,21 @@ fish <- fish |>
 ```{r}
 #| label: condition-indices-over-time
 
-library(ggridges)
-
-
-ggplot(fish, aes(x = year,
-                 y = condition,
+ggplot(fish, aes(x = year, 
+                 y = condition, 
                  color = species
                  )
-       ) +
+       ) + 
   geom_point(alpha = 0.5) +
   geom_smooth(method = "loess",
-              se = FALSE) +
-  facet_wrap(~ species) +
-  labs(
-    title = "Fish Condition Index Over Time Grouped by Species",
-    x = "Year",
-    subtitle = "Condition Index",
-    y = ""
+              se = FALSE) + 
+  facet_wrap(~ species) + 
+  labs(title = "Fish Condition Index Over Time Grouped by Species", 
+       x = "Year",
+       subtitle = "Codition Index", 
+       y = ""
   ) +
   theme_minimal() +
   theme_bw()
-
-
-
 
 ```
