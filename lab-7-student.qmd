@@ -277,12 +277,13 @@ section of R for Data Science!
 ```{r}
 #| label: rescale-data-frame-function
 
-rescale_column <- function(Df, x) {
-  for (col in x) {
-  Df[[col]] <- rescale_01(Df[[col]])
-  }
+rescale_column <- function(Df, cols) {
+   Df <- Df |> 
+    mutate(across({{ cols }}, rescale_01))
   return(Df)
 }
+
+
 
 ```
 
@@ -295,8 +296,8 @@ I expect that you carry out this process by calling the `rescale_column()` funct
 ```{r}
 #| label: rescale-two-columns
 
-rescale_column(fish, c("length",
-                       "weight"
+rescale_column(fish, c(length,
+                       weight
                        )
                )
 
