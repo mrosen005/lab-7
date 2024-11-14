@@ -1,15 +1,23 @@
 ---
 title: "Challenge 7: Incorporating Multiple Inputs"
 subtitle: "Functions + Fish"
-author: "Your name here!"
-format: html
+author: "Miriam Rosen" 
+format: 
+  html:  
+    embed-resources: true
+    code-tools: true
+    code-fold: true
+    toc: true
 editor: source
-embed-resources: true
+execute: 
+  echo: true
+  message: false
+  warning: false
 ---
 
 ```{r}
 #| label: setup
-
+library(tidyverse)
 
 ```
 
